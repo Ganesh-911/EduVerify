@@ -5,6 +5,7 @@ const helmet = require("helmet");
 
 const connectDatabase = require("./config/database");
 const departmentRoutes = require("./routes/departmentRoutes");
+const authRoutes = require("./routes/authRoutes");
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/departments", departmentRoutes);
+app.use("/api/auth", authRoutes);
 
 app.get("/api/health", (req, res) => {
   res.status(200).json({

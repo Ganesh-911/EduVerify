@@ -5,9 +5,11 @@ const {
   getAllDepartmentsController,
 } = require("../controllers/departmentController");
 
+const authenticateToken = require("../middleware/authMiddleware");
+
 const router = express.Router();
 
-router.post("/", createDepartmentController);
+router.post("/", authenticateToken, createDepartmentController);
 router.get("/", getAllDepartmentsController);
 
 module.exports = router;
