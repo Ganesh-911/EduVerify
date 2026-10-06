@@ -3,13 +3,14 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const helmet = require("helmet");
 
+const connectDatabase = require("./config/database");
+
 dotenv.config();
 
 const app = express();
 
 const PORT = process.env.PORT || 5000;
 
-// Security middleware
 app.use(helmet());
 
 app.use(
@@ -18,11 +19,9 @@ app.use(
   })
 );
 
-// Request body parsing
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Health check
 app.get("/api/health", (req, res) => {
   res.status(200).json({
     success: true,
@@ -31,7 +30,14 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`EduVerify API running on http://localhost:${PORT}`);
-});
+async function startServer() {
+  await connectDatabase();
+
+  app.listen(PORT, () => {
+    console.log(
+      `EduVerify API running on http://localhost:${PORT}`
+    );
+  });
+}
+
+startServer();

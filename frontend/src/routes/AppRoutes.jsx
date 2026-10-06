@@ -1,5 +1,7 @@
 import { Route, Routes } from "react-router";
 
+import PublicLayout from "../layouts/PublicLayout";
+
 import Home from "../pages/public/Home";
 import VerifyCredential from "../pages/public/VerifyCredential";
 
@@ -16,39 +18,34 @@ import NotFound from "../pages/NotFound";
 function AppRoutes() {
   return (
     <Routes>
-      {/* Public routes */}
-      <Route path="/" element={<Home />} />
-      <Route path="/verify" element={<VerifyCredential />} />
+      <Route element={<PublicLayout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/verify" element={<VerifyCredential />} />
+      </Route>
 
-      {/* Authentication */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* Student */}
       <Route
         path="/student/dashboard"
         element={<StudentDashboard />}
       />
 
-      {/* Department Admin */}
       <Route
         path="/department/dashboard"
         element={<DepartmentDashboard />}
       />
 
-      {/* Registrar */}
       <Route
         path="/registrar/dashboard"
         element={<RegistrarDashboard />}
       />
 
-      {/* Super Admin */}
       <Route
         path="/admin/dashboard"
         element={<AdminDashboard />}
       />
 
-      {/* 404 */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
