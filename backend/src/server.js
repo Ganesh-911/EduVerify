@@ -8,6 +8,7 @@ const departmentRoutes = require("./routes/departmentRoutes");
 const authRoutes = require("./routes/authRoutes");
 const errorHandler = require("./middleware/errorMiddleware");
 const studentRoutes = require("./routes/studentRoutes");
+const credentialRoutes = require("./routes/credentialRoutes");
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/departments", departmentRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/students", studentRoutes);
+app.use("/api/credentials", credentialRoutes);
 app.use(errorHandler);
 
 app.get("/api/health", (req, res) => {
