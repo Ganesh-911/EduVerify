@@ -20,8 +20,8 @@ async function login(req, res) {
       departmentId: user.departmentId
         ? user.departmentId.toString()
         : null,
+      studentId: user.studentId || null,
     });
-
     return res.status(200).json({
       success: true,
       message: "Login successful",

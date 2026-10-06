@@ -6,6 +6,8 @@ const helmet = require("helmet");
 const connectDatabase = require("./config/database");
 const departmentRoutes = require("./routes/departmentRoutes");
 const authRoutes = require("./routes/authRoutes");
+const errorHandler = require("./middleware/errorMiddleware");
+const studentRoutes = require("./routes/studentRoutes");
 
 dotenv.config();
 
@@ -26,6 +28,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/departments", departmentRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/students", studentRoutes);
+app.use(errorHandler);
 
 app.get("/api/health", (req, res) => {
   res.status(200).json({

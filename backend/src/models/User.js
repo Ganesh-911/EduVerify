@@ -38,6 +38,13 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
 
+    studentId: {
+      type: String,
+      trim: true,
+      uppercase: true,
+      default: null,
+    },
+
     isActive: {
       type: Boolean,
       default: true,
