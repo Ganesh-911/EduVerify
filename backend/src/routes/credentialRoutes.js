@@ -3,6 +3,8 @@ const express = require("express");
 const {
   createCredentialController,
   getCredentialController,
+  issueCredentialController,
+  generateCredentialCertificateController,
 } = require("../controllers/credentialController");
 
 const authenticateToken = require("../middleware/authMiddleware");
@@ -18,6 +20,18 @@ router.post(
   createCredentialController
 );
 
+router.patch(
+  "/:credentialId/issue",
+  authenticateToken,
+  authorizeRoles("REGISTRAR", "SUPER_ADMIN"),
+  issueCredentialController
+);
+router.post(
+  "/:credentialId/certificate",
+  authenticateToken,
+  authorizeRoles("REGISTRAR", "SUPER_ADMIN"),
+  generateCredentialCertificateController
+);
 // Get credential — authenticated users for internal management
 router.get(
   "/:credentialId",
