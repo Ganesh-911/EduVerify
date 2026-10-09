@@ -10,6 +10,7 @@ const errorHandler = require("./middleware/errorMiddleware");
 const studentRoutes = require("./routes/studentRoutes");
 const credentialRoutes = require("./routes/credentialRoutes");
 const certificateRoutes = require("./routes/certificateRoutes");
+const verificationRoutes = require("./routes/verificationRoutes");
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/students", studentRoutes);
 app.use("/api/credentials", credentialRoutes);
 app.use("/api/certificates", certificateRoutes);
+app.use("/api/verify", verificationRoutes);
 app.use(errorHandler);
 
 app.get("/api/health", (req, res) => {

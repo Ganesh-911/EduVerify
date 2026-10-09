@@ -1,3 +1,7 @@
+const fs = require("fs");
+const path = require("path");
+const { calculateFileHash } = require("../utils/fileHash");
+
 const crypto = require("crypto");
 
 const Credential = require("../models/Credential");
@@ -103,6 +107,119 @@ async function generateCredentialCertificate(credentialId) {
 
   return credential;
 }
+async function activateCredential(credentialId) {
+  const normalizedCredentialId = credentialId.trim().toUpperCase();
+
+  const credential = await Credential.findOne({
+    credentialId: normalizedCredentialId,
+  });
+
+  if (!credential) {
+    const error = new Error("Credential not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (credential.status !== "ISSUED") {
+    const error = new Error(
+      `Only ISSUED credentials can be activated. Current status: ${credential.status}`
+    );
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (!credential.documentUrl || !credential.documentHash) {
+    const error = new Error(
+      "Certificate and document hash must exist before activation"
+    );
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const fileName = path.basename(credential.documentUrl);
+
+  // Prevent paths other than the expected generated PDF filename.
+  if (fileName !== credential.documentUrl.split("/").pop()) {
+    const error = new Error("Invalid certificate file reference");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const certificatesDirectory = path.resolve(
+    __dirname,
+    "../../../certificates"
+  );
+
+  const filePath = path.resolve(certificatesDirectory, fileName);
+
+  if (
+    path.dirname(filePath) !== certificatesDirectory ||
+    !fileName.toLowerCase().endsWith(".pdf")
+  ) {
+    const error = new Error("Invalid certificate file reference");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (!fs.existsSync(filePath)) {
+    const error = new Error("Certificate file is missing");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const actualHash = await calculateFileHash(filePath);
+
+  if (actualHash !== credential.documentHash) {
+    const error = new Error(
+      "Certificate integrity check failed. Regenerate the certificate before activation."
+    );
+    error.statusCode = 409;
+    throw error;
+  }
+
+  credential.status = "ACTIVE";
+  await credential.save();
+
+  return credential;
+}
+
+async function revokeCredential(credentialId, reason) {
+  const normalizedCredentialId = credentialId.trim().toUpperCase();
+  const normalizedReason = reason.trim();
+
+  if (!normalizedReason) {
+    const error = new Error("Revocation reason is required");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const credential = await Credential.findOne({
+    credentialId: normalizedCredentialId,
+  });
+
+  if (!credential) {
+    const error = new Error("Credential not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (credential.status !== "ACTIVE") {
+    const error = new Error(
+      "Only active credentials can be revoked"
+    );
+    error.statusCode = 409;
+    throw error;
+  }
+
+  credential.status = "REVOKED";
+  credential.revokedAt = new Date();
+  credential.revocationReason = normalizedReason;
+
+  await credential.save();
+
+  return credential;
+}
+
 
 async function getCredentialById(credentialId) {
   return Credential.findOne({
@@ -118,4 +235,6 @@ module.exports = {
   getCredentialById,
   issueCredential,
   generateCredentialCertificate,
+  activateCredential,
+  revokeCredential,
 };

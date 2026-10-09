@@ -8,7 +8,10 @@ export const API_ENDPOINTS = {
   },
 
   CREDENTIALS: {
-    VERIFY: "/credentials/verify",
-    GET_BY_ID: "/credentials",
+  GET_BY_ID: "/credentials",
+  },
+
+  VERIFY: {
+    CREDENTIAL: "/verify",
   },
 };

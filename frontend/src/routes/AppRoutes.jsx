@@ -21,6 +21,10 @@ function AppRoutes() {
       <Route element={<PublicLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/verify" element={<VerifyCredential />} />
+        <Route
+          path="/verify/:credentialId"
+          element={<VerifyCredential />}
+        />
       </Route>
 
       <Route path="/login" element={<Login />} />

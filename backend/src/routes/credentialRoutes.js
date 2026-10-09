@@ -5,6 +5,8 @@ const {
   getCredentialController,
   issueCredentialController,
   generateCredentialCertificateController,
+  activateCredentialController,
+  revokeCredentialController,
 } = require("../controllers/credentialController");
 
 const authenticateToken = require("../middleware/authMiddleware");
@@ -31,6 +33,18 @@ router.post(
   authenticateToken,
   authorizeRoles("REGISTRAR", "SUPER_ADMIN"),
   generateCredentialCertificateController
+);
+router.patch(
+  "/:credentialId/activate",
+  authenticateToken,
+  authorizeRoles("REGISTRAR", "SUPER_ADMIN"),
+  activateCredentialController
+);
+router.patch(
+  "/:credentialId/revoke",
+  authenticateToken,
+  authorizeRoles("REGISTRAR", "SUPER_ADMIN"),
+  revokeCredentialController
 );
 // Get credential — authenticated users for internal management
 router.get(

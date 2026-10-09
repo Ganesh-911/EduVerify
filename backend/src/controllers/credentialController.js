@@ -3,6 +3,8 @@ const {
   getCredentialById,
   issueCredential,
   generateCredentialCertificate,
+  activateCredential,
+  revokeCredential,
 } = require("../services/credentialService");
 
 const validateCredential = require("../validators/credentialValidator");
@@ -80,6 +82,65 @@ async function generateCredentialCertificateController(req, res, next) {
     next(error);
   }
 }
+async function activateCredentialController(req, res, next) {
+  try {
+    const { credentialId } = req.params;
+
+    if (!credentialId || !credentialId.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Credential ID is required",
+      });
+    }
+
+    const credential = await activateCredential(credentialId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Credential activated successfully",
+      data: credential,
+    });
+  } catch (error) {
+    console.error("Activate credential error:", error.message);
+    next(error);
+  }
+}
+
+async function revokeCredentialController(req, res, next) {
+  try {
+    const { credentialId } = req.params;
+    const { reason } = req.body;
+
+    if (!credentialId || !credentialId.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Credential ID is required",
+      });
+    }
+
+    if (typeof reason !== "string" || !reason.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Revocation reason is required",
+      });
+    }
+
+    const credential = await revokeCredential(
+      credentialId,
+      reason
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Credential revoked successfully",
+      data: credential,
+    });
+  } catch (error) {
+    console.error("Revoke credential error:", error.message);
+    next(error);
+  }
+}
+
 
 async function getCredentialController(req, res, next) {
   try {
@@ -116,4 +177,6 @@ module.exports = {
   getCredentialController,
   issueCredentialController,
   generateCredentialCertificateController,
+  activateCredentialController,
+  revokeCredentialController,
 };
