@@ -1,4 +1,7 @@
+
 const express = require("express");
+
+const authenticateToken = require("../middleware/authMiddleware");
 
 const {
   downloadCertificateController,
@@ -6,6 +9,7 @@ const {
 
 const router = express.Router();
 
-router.get("/:filename", downloadCertificateController);
+// Only authenticated users can download certificate PDFs.
+router.get("/:filename", authenticateToken, downloadCertificateController);
 
 module.exports = router;

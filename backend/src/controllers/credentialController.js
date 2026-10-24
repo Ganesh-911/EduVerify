@@ -1,10 +1,12 @@
 const {
   createCredential,
   getCredentialById,
+  getAllCredentials,
   issueCredential,
   generateCredentialCertificate,
   activateCredential,
   revokeCredential,
+  getCredentialAuditHistory,
 } = require("../services/credentialService");
 
 const validateCredential = require("../validators/credentialValidator");
@@ -21,10 +23,16 @@ async function createCredentialController(req, res, next) {
       });
     }
 
-    const credential = await createCredential({
-      studentId: req.body.studentId,
-      credentialType: req.body.credentialType,
-    });
+   const credential = await createCredential(
+  {
+    studentId: req.body.studentId,
+    credentialType: req.body.credentialType,
+  },
+  {
+    id: req.user.userId,
+    role: req.user.role,
+  }
+);
 
     return res.status(201).json({
       success: true,
@@ -36,6 +44,7 @@ async function createCredentialController(req, res, next) {
     next(error);
   }
 }
+
 async function issueCredentialController(req, res, next) {
   try {
     const { credentialId } = req.params;
@@ -47,7 +56,10 @@ async function issueCredentialController(req, res, next) {
       });
     }
 
-    const credential = await issueCredential(credentialId);
+    const credential = await issueCredential(credentialId, {
+      id: req.user.userId,
+      role: req.user.role,
+    });
 
     return res.status(200).json({
       success: true,
@@ -59,6 +71,7 @@ async function issueCredentialController(req, res, next) {
     next(error);
   }
 }
+
 async function generateCredentialCertificateController(req, res, next) {
   try {
     const { credentialId } = req.params;
@@ -70,8 +83,10 @@ async function generateCredentialCertificateController(req, res, next) {
       });
     }
 
-    const credential = await generateCredentialCertificate(credentialId);
-
+const credential = await generateCredentialCertificate(credentialId, {
+  id: req.user.userId,
+  role: req.user.role,
+});
     return res.status(200).json({
       success: true,
       message: "Certificate generated successfully",
@@ -93,7 +108,10 @@ async function activateCredentialController(req, res, next) {
       });
     }
 
-    const credential = await activateCredential(credentialId);
+    const credential = await activateCredential(credentialId,{
+      id: req.user.userId,
+      role: req.user.role,  
+    });
 
     return res.status(200).json({
       success: true,
@@ -126,9 +144,13 @@ async function revokeCredentialController(req, res, next) {
     }
 
     const credential = await revokeCredential(
-      credentialId,
-      reason
-    );
+  credentialId,
+  reason,
+  {
+    id: req.user.userId,
+    role: req.user.role,
+  }
+);
 
     return res.status(200).json({
       success: true,
@@ -137,6 +159,20 @@ async function revokeCredentialController(req, res, next) {
     });
   } catch (error) {
     console.error("Revoke credential error:", error.message);
+    next(error);
+  }
+}
+
+async function getAllCredentialsController(req, res, next) {
+  try {
+    const credentials = await getAllCredentials();
+
+    return res.status(200).json({
+      success: true,
+      data: credentials,
+    });
+  } catch (error) {
+    console.error("Get credentials error:", error.message);
     next(error);
   }
 }
@@ -172,11 +208,36 @@ async function getCredentialController(req, res, next) {
   }
 }
 
+async function getCredentialAuditHistoryController(req, res, next) {
+  try {
+    const { credentialId } = req.params;
+
+    if (!credentialId || !credentialId.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Credential ID is required",
+      });
+    }
+
+    const auditHistory = await getCredentialAuditHistory(credentialId);
+
+    return res.status(200).json({
+      success: true,
+      data: auditHistory,
+    });
+  } catch (error) {
+    console.error("Get credential audit history error:", error.message);
+    next(error);
+  }
+}
+
 module.exports = {
   createCredentialController,
   getCredentialController,
+  getAllCredentialsController,
   issueCredentialController,
   generateCredentialCertificateController,
   activateCredentialController,
   revokeCredentialController,
+  getCredentialAuditHistoryController,
 };

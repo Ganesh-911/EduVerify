@@ -5,20 +5,35 @@ const dns = require("dns");
 dns.setServers(["8.8.8.8"]);
 
 const mongoose = require("mongoose");
-const Student = require("./src/models/Student");
+const User = require("./src/models/User");
 
 async function main() {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
 
-    const student = await Student.findOne(
-  { studentId: "BVC23CSE002" }
-)
-  .select("studentId name academicStatus program batch graduationYear")
-  .lean();
+    const accounts = await User.aggregate([
+      {
+        $match: {
+          role: { $in: ["REGISTRAR", "SUPER_ADMIN"] },
+        },
+      },
+      {
+        $group: {
+          _id: { role: "$role", isActive: "$isActive" },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { "_id.role": 1, "_id.isActive": -1 } },
+    ]);
 
-console.log("\nStudent record:");
-console.dir(student, { depth: 2 });
+    console.log("\nAuthorized account counts:");
+    console.table(
+      accounts.map(({ _id, count }) => ({
+        role: _id.role,
+        isActive: _id.isActive,
+        count,
+      }))
+    );
   } catch (error) {
     console.error("Inspection failed:", error.message);
     process.exitCode = 1;

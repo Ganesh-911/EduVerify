@@ -1,3 +1,4 @@
+
 import { Route, Routes } from "react-router";
 
 import PublicLayout from "../layouts/PublicLayout";
@@ -12,12 +13,14 @@ import StudentDashboard from "../pages/student/StudentDashboard";
 import DepartmentDashboard from "../pages/department/DepartmentDashboard";
 import RegistrarDashboard from "../pages/registrar/RegistrarDashboard";
 import AdminDashboard from "../pages/admin/AdminDashboard";
-
+import DashboardLayout from "../layouts/DashboardLayout";
+import ProtectedRoute from "./ProtectedRoute";
 import NotFound from "../pages/NotFound";
 
 function AppRoutes() {
   return (
     <Routes>
+      {/* Public pages */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/verify" element={<VerifyCredential />} />
@@ -27,28 +30,55 @@ function AppRoutes() {
         />
       </Route>
 
+      {/* Authentication pages */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      <Route
-        path="/student/dashboard"
-        element={<StudentDashboard />}
-      />
+      
+      {/* Student dashboard */}
+      <Route element={<ProtectedRoute allowedRoles={["STUDENT"]} />}>
+        <Route element={<DashboardLayout />}>
+          <Route
+            path="/student/dashboard"
+            element={<StudentDashboard />}
+          />
+        </Route>
+      </Route>
 
+      {/* Department administrator dashboard */}
       <Route
-        path="/department/dashboard"
-        element={<DepartmentDashboard />}
-      />
+        element={
+          <ProtectedRoute allowedRoles={["DEPARTMENT_ADMIN"]} />
+        }
+      >
+        <Route element={<DashboardLayout />}>
+          <Route
+            path="/department/dashboard"
+            element={<DepartmentDashboard />}
+          />
+        </Route>
+      </Route>
 
-      <Route
-        path="/registrar/dashboard"
-        element={<RegistrarDashboard />}
-      />
+      {/* Registrar dashboard */}
+      <Route element={<ProtectedRoute allowedRoles={["REGISTRAR"]} />}>
+        <Route element={<DashboardLayout />}>
+          <Route
+            path="/registrar/dashboard"
+            element={<RegistrarDashboard />}
+          />
+        </Route>
+      </Route>
 
-      <Route
-        path="/admin/dashboard"
-        element={<AdminDashboard />}
-      />
+      {/* Super administrator dashboard */}
+      <Route element={<ProtectedRoute allowedRoles={["SUPER_ADMIN"]} />}>
+        <Route element={<DashboardLayout />}>
+          <Route
+            path="/admin/dashboard"
+            element={<AdminDashboard />}
+          />
+        </Route>
+      </Route>
+
 
       <Route path="*" element={<NotFound />} />
     </Routes>
